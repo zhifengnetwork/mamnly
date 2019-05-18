@@ -300,10 +300,15 @@ class UsersLogic extends Model
 			
 			if(!empty($is_cunzai)){
 
-				Db::name('users')->where(array('openid'=>$map['openid']))->update($map);
-				$row_id = $is_cunzai['user_id'];
+				 $row_id = Db::name('users')->add($map);
+				//$row_id = $is_cunzai['user_id'];
 					
-			}
+			}else{
+                Db::name('users')->where(array('openid'=>$map['openid']))->update($map);
+                $row_id = $is_cunzai['user_id'];
+
+            }
+
 
 
 			$user = Db::name('users')->where(array('user_id'=>$row_id))->find();
