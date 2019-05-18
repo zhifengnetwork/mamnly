@@ -299,14 +299,15 @@ class UsersLogic extends Model
             //write_log('新注册：openid'.$data['openid'].'--name--'.$data['nickname'].'time'.$time.'访问ip地址：' . $request->ip());
 			
 			if(!empty($is_cunzai)){
-				
 
-				 $row_id = Db::name('users')->add($map);
+ 				 Db::name('users')->where(array('openid'=>$map['openid']))->update($map);
+                $row_id = $is_cunzai['user_id'];
+				
 				//$row_id = $is_cunzai['user_id'];
 					
 			}else{
-                Db::name('users')->where(array('openid'=>$map['openid']))->update($map);
-                $row_id = $is_cunzai['user_id'];
+              
+                 $row_id = Db::name('users')->add($map);
 
             }
 
