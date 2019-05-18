@@ -93,7 +93,7 @@ class MobileBase extends Controller {
 
                     //如果 没有  is_cunzai_user
                     if(!$is_cunzai_user){
-
+                        /*
                         if(I('old_openid') == ''){
                             //跳去获取旧openid
                             header('Location:/shop/code/index');
@@ -102,7 +102,7 @@ class MobileBase extends Controller {
                             $old_openid = I('old_openid');
                         
                             $wxuser['old_openid'] = $old_openid;
-                        }
+                        }*/
 
                         //过滤特殊字符串
                         $wxuser['nickname'] && $wxuser['nickname'] = replaceSpecialStr($wxuser['nickname']);
