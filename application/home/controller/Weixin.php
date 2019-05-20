@@ -13,10 +13,9 @@ class Weixin
      */
     public function index()
     {
-        write_log('微信公众号-----1');
+
         $data = file_get_contents("php://input");
     	if ($data) {
-            write_log('微信公众号-----2'.json_encode($data));
             $re = $this->xmlToArray($data);
             
 	    	$url = SITE_URL.'/mobile/message/index?eventkey='.$re['EventKey'].'&openid='.$re['FromUserName'].'&event='.$re['Event'];
@@ -28,7 +27,7 @@ class Weixin
             ob_clean();
             exit($_GET["echostr"]);
         }
-         write_log('微信公众号-----3');
+      
         $logic = new WechatLogic($config);
         $str = serialize($logic);
         $a = $logic->handleMessage();
