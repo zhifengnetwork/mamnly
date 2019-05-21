@@ -13,7 +13,7 @@ body{
 	background: -webkit-linear-gradient(top, #fe44a0 0%, #e81295 100%);
 	background: -o-linear-gradient(top, #fe44a0 0%, #e81295 100%);
     background: -ms-linear-gradient(top, #fe44a0 0%, #e81295 100%); */
-    background-color: #ff7191;
+    background-color: rgb(31,31,31);
     display: flex;
     display: -webkit-box; /* Chrome 4+, Safari 3.1, iOS Safari 3.2+ */ 
     display: -moz-box; /* Firefox 17- */ 
@@ -102,7 +102,7 @@ body{
     color: #151515;
 }
 .nav-wrap-zp ul li img{
-    width: .7rem;
+    width: .6rem;
     margin: 0 auto 0.1rem;
     display: block;
 }

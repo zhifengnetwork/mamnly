@@ -255,10 +255,10 @@ class UsersLogic extends Model
 	{
 		write_log("newopenid=".$data['openid']);
 	  
-		if (!$data['openid'] || !$data['oauth'] || !$data['old_openid']) {
+		if (!$data['openid'] || !$data['oauth']) {
 			return array('status' => -1, 'msg' => '参数有误openid或oauth丢失', 'result' => 'aaa');
 		}
-		write_log("oldopenid=".$data['old_openid']);
+		//write_log("oldopenid=".$data['old_openid']);
 		// $user2 = session('user');
 		// if (!empty($user2)) {
 		//     $r = $this->oauth_bind($data);//绑定账号
@@ -295,45 +295,22 @@ class UsersLogic extends Model
 			// } 
 
 			$is_cunzai = Db::name('users')->where(array('openid'=>$data['openid']))->find();
-			$time=date("Y-m-d H:i:s");
-            write_log('新注册：openid'.$data['openid'].'--name--'.$data['nickname'].'time'.$time.'访问ip地址：' . $request->ip());
+			//$time=date("Y-m-d H:i:s");
+            //write_log('新注册：openid'.$data['openid'].'--name--'.$data['nickname'].'time'.$time.'访问ip地址：' . $request->ip());
 			
 			if(!empty($is_cunzai)){
-			 	write_log('新注册数据查询1：openid='.$is_cunzai['openid'].'--name--'.$is_cunzai['nickname'].'time'.$time.'==data_openid'.$data['openid'].'访问ip地址：' . $request->ip());
-				$map['sign_old_openid'] = 555;
-				Db::name('users')->where(array('openid'=>$map['openid']))->update($map);
-				$row_id = $is_cunzai['user_id'];
+
+ 				 Db::name('users')->where(array('openid'=>$map['openid']))->update($map);
+                $row_id = $is_cunzai['user_id'];
+				
+				//$row_id = $is_cunzai['user_id'];
 					
 			}else{
+              
+                 $row_id = Db::name('users')->add($map);
 
-				$old_user = Db::name('users')->where(['old_openid'=>$data['old_openid']])->find();
-				$matched_user = Db::name('users')->where('openid','<>',$old_user['old_openid'])->find();
-				//if(!empty($matched_user))
-				if($old_user['old_openid']!=$old_user['openid'])
-				{
-					//新用户
-					$map['sign_old_openid'] = 7777;
-					$row_id = Db::name('users')->add($map);
-				}else{
+            }
 
-				  	write_log('新注册数据查询2：old_openid='.$old_user['old_openid'].'--name--'.$old_user['nickname'].'time'.$time.'==data_old_openid'.$data['old_openid'].'访问ip地址：' . $request->ip());
-				 
-					if(!empty($old_user)){
-						
-						$map['sign_old_openid'] = 222;
-						Db::name('users')->where(array('user_id'=>$old_user['user_id']))->update($map);
-						$row_id = $old_user['user_id'];
-
-					}else{
-				
-						//新用户
-						$map['sign_old_openid'] = 111;
-						$row_id = Db::name('users')->add($map);
-					}
-				}
-
-
-			}
 
 
 			$user = Db::name('users')->where(array('user_id'=>$row_id))->find();
@@ -368,46 +345,12 @@ class UsersLogic extends Model
 			// }
 			
 		} else {
-			$map['head_pic'] = !empty($data['head_pic']) ? $data['head_pic'] : '/public/images/icon_goods_thumb_empty_300.png?v=1';
-            $time=date("Y-m-d H:i:s");
-             write_log('已注册：openid'.$data['openid'].'--name--'.$data['nickname'].'time'.$time.'访问ip地址：' . $request->ip());
-			$is_cunzai_data = Db::name('users')->where(array('openid'=>$data['openid']))->find();
+			$map['head_pic'] = !empty($data['head_pic']) ? $data['head_pic'] : '/public/images/icon_goods_thumb_empty_300.png';
 
-			if(!empty($is_cunzai_data)){
-				write_log('已注册数据查询1：openid='.$is_cunzai_data['openid'].'--name--'.$is_cunzai_data['nickname'].'time'.$time.'访问ip地址：' . $request->ip());
-				$map['sign_old_openid'] = 6666;
-				Db::name('users')->where('openid', $data['openid'])->save($map);
-		
-			}else {
-
-			  $time=date("Y-m-d H:i:s");
-              write_log('已注册：old_openid'.$data['old_openid'].'--name--'.$data['nickname'].'time'.$time.'访问ip地址：' . $request->ip());
-			 	//查找是否已有老数据
-				$old_user = Db::name('users')->where(['old_openid'=>$data['old_openid']])->find();
-				$sql =Db::name('users')->getlastsql();
-				write_log($sql);
-				write_log('已注册数据查询2：old_openid='.$old_user['old_openid'].'--name--'.$old_user['nickname'].'time'.$time.'---openid---'.$data['old_openid'].'访问ip地址：' . $request->ip());
-				if($old_user){
-					write_log('已找到老数据');
-					//更新老数据并删除新注册的数据
-					$map['openid'] = $data['openid'];
-					$map['is_code'] = $user['is_code'];
-					$map['old_userid'] = $user['user_id'];
-					$map['sign_old_openid'] = 333;
-					Db::name('users')->where('user_id', $old_user['user_id'])->save($map);
-					Db::name('oauth_users')->where('openid', $data['openid'])->save(['user_id'=>$old_user['user_id']]);
-					Db::name('users')->where(array('user_id'=>$user['user_id']))->delete();
-				}else{
-					write_log('新数据');
-					$map['openid'] = $data['openid'];
-					$map['sign_old_openid'] = 444;
-					Db::name('users')->where('user_id', $user['user_id'])->save($map);
-				}
-			 	
-			}
 
 			$user['token'] = $map['token'];
 			$user['last_login'] = $map['last_login'];
+			Db::name('users')->where('user_id', $user['user_id'])->save($map);
 		}
 	
 		return array('status'=>1,'msg'=>'登陆成功','result'=>$user);
