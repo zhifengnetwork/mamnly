@@ -131,7 +131,7 @@
 						<div class="item">
 							<a href="{:U('Shop/Goods/goodsInfo',array('id'=>$v[goods_id],'item_id'=>$v[item_id]))}">
 								<div class="picture">
-									<img src="{$v[goods_id]|goods_thum_images=200,200}?v={:date('Ymd')}">
+									<img src="{$v[goods_id]|goods_thum_images=200,200}?v={:date('Ym')}">
 								</div>
 							</a>
 							<p class="price">￥<span>{$v[price]}</span>元</p>
@@ -154,7 +154,7 @@
 						<div class="item">
 							<a href="{:U('Shop/Goods/goodsInfo',array('id'=>$vo[goods_id],'item_id'=>$vo[item_id]))}">
 								<div class="picture">
-									<img src="{$vo[goods_id]|goods_thum_images=200,200}?v={:date('Ymd')}">
+									<img src="{$vo[goods_id]|goods_thum_images=200,200}?v={:date('Ym')}">
 								</div>
 								<p class="price">￥<span>{$vo[shop_price]}</span>元</p>
 							</a>
@@ -182,7 +182,7 @@
 						<li>
 							<div class="img-wrap">
 								<a href="{:U('Shop/Goods/goodsInfo',array('id'=>$v[goods_id]))}"><img
-										src="{$v[goods_id]|goods_thum_images=400,400}?v={:date('Ymd')}" /></a>
+										src="{$v[goods_id]|goods_thum_images=400,400}?v={:date('Ym')}" /></a>
 							</div>
 							<div class="text">
 								<p class="tit"><a

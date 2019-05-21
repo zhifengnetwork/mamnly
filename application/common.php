@@ -579,7 +579,7 @@ function goods_thum_images($goods_id, $width, $height,$item_id=0)
 
 
     if (empty($original_img)) {
-        return '/public/images/icon_goods_thumb_empty_300.png';
+        return '/public/images/icon_goods_thumb_empty_300.png?v=1';
     }
     
     if(tpCache('oss.oss_switch')){
@@ -591,7 +591,7 @@ function goods_thum_images($goods_id, $width, $height,$item_id=0)
 
     $original_img = '.' . $original_img; // 相对路径
     if (!is_file($original_img)) {
-        return '/public/images/icon_goods_thumb_empty_300.png';
+        return '/public/images/icon_goods_thumb_empty_300.png?v=1';
     }
 
     try {
@@ -643,7 +643,7 @@ function get_sub_images($sub_img, $goods_id, $width, $height)
     
     $original_img = '.' . $sub_img['image_url']; //相对路径
     if (!is_file($original_img)) {
-        return '/public/images/icon_goods_thumb_empty_300.png';
+        return '/public/images/icon_goods_thumb_empty_300.png?v=1';
     }
 
     try {
