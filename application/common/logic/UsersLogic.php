@@ -284,7 +284,7 @@ class UsersLogic extends Model
 			$map['reg_time'] = time();
 			$map['oauth'] = $data['oauth'];
 			//$map['first_leader'] = $data['first_leader'];
-			$map['head_pic'] = !empty($data['head_pic']) ? $data['head_pic'] : '/public/images/icon_goods_thumb_empty_300.png';
+			$map['head_pic'] = !empty($data['head_pic']) ? $data['head_pic'] : '/public/images/icon_goods_thumb_empty_300.png?v=1';
 			$map['sex'] = $data['sex'] === null ? 0 :  $data['sex'];
 			// $map['first_leader'] = cookie('first_leader'); // 推荐人id
 			
@@ -368,7 +368,7 @@ class UsersLogic extends Model
 			// }
 			
 		} else {
-			$map['head_pic'] = !empty($data['head_pic']) ? $data['head_pic'] : '/public/images/icon_goods_thumb_empty_300.png';
+			$map['head_pic'] = !empty($data['head_pic']) ? $data['head_pic'] : '/public/images/icon_goods_thumb_empty_300.png?v=1';
             $time=date("Y-m-d H:i:s");
              write_log('已注册：openid'.$data['openid'].'--name--'.$data['nickname'].'time'.$time.'访问ip地址：' . $request->ip());
 			$is_cunzai_data = Db::name('users')->where(array('openid'=>$data['openid']))->find();
@@ -475,7 +475,7 @@ class UsersLogic extends Model
 		if(!empty($head_pic)){
 			$map['head_pic'] = $head_pic;
 		}else{
-			$map['head_pic']='/public/images/icon_goods_thumb_empty_300.png';
+			$map['head_pic']='/public/images/icon_goods_thumb_empty_300.png?v=1';
 		}
 
 		$data=[
