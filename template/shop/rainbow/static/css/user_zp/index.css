@@ -3,14 +3,14 @@
 	width: 100%;
 	height: 100%;
 	background: #ededed;
-	
 	padding-bottom: 1rem;
 }
 
 /*我的顶部*/
 .user-head-zp{
 	height: 2.4rem;
-	background: linear-gradient(to bottom, #fe44a0,#660a90);
+	/*background: linear-gradient(to bottom, #fe44a0,#660a90);*/
+	background: rgb(31,31,31);
 	padding: 0 0.2rem;
 	margin-bottom: 0.2rem;
 }
