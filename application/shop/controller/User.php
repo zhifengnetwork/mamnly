@@ -2229,8 +2229,13 @@ class User extends MobileBase
 	 */
 	public function yj_img($imgpath) {
 		$ext     = pathinfo($imgpath);
-		$src_img = null;
-		switch ($ext['extension']) {
+        $src_img = null;
+        
+        $ename = getimagesize($imgpath); 
+        $ename = explode('/',$ename['mime']); 
+        $ext = $ename[1]; 
+
+		switch ($ext) {
 		case 'jpg':
 			$src_img = imagecreatefromjpeg($imgpath);
 			break;
