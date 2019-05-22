@@ -458,7 +458,7 @@ class Image
 
             /* QRCODE */
             case self::QRCODE:
-            $x = 120;
+            $x = 105;
             $y = 302;
             break;
               
