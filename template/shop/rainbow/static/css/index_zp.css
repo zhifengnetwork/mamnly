@@ -29,7 +29,7 @@ body{
     z-index: 99;
 }
 .header .scan img{
-    width: .7rem;
+    width: .65rem;
 }
 .header .search{
     width: 100%;
@@ -60,7 +60,7 @@ body{
     box-sizing: border-box;
 }
 .header .login-btn img{
-    width: .85rem;
+    width: .75rem;
 }
 
 /* 轮播图 */
@@ -205,10 +205,16 @@ body{
 
 /* 为你推荐 */
 .recommend-wrap .title{
-    margin: 0.2rem 0;
+   
+    /*background: rgb(31,31,31);*/
+    height: .8rem;
+    width: 7.1rem;
+    /*margin: .3rem auto;*/
+   
+   
 }
 .recommend-wrap .title h3{
-    color: #e907b7;
+    color: black;
     font-size: 0.24rem;
     display: flex;
     display: -webkit-box; /* Chrome 4+, Safari 3.1, iOS Safari 3.2+ */ 
@@ -218,23 +224,30 @@ body{
     display: -ms-flexbox; /* IE 10 */ 
     align-items: center;
     justify-content: center;
+    padding-top: .3rem;
+    letter-spacing: .3rem;
+   
+   
+    
+    
 }
 .recommend-wrap .title h3::before{
-    width: 3rem;
+    width: 2rem;
     height: 0.03rem;
     margin-right: 0.1rem;
     content: '';
     display: inline-block;
-    background: url(../images/home_zp/line-left.png) no-repeat;
+    background: url(../images/home_zp/lletf_line.png) no-repeat;
     background-size: 100%;
+  
 }
 .recommend-wrap .title h3::after{
-    width: 3rem;
+    width: 2rem;
     height: 0.03rem;
     margin-left: 0.1rem;
     content: '';
     display: inline-block;
-    background: url(../images/home_zp/line-right.png) no-repeat;
+    background: url(../images/home_zp/lletf_line.png) no-repeat;
     background-size: 100%;
 }
 
@@ -307,5 +320,19 @@ body{
 
 .free-receive .dialog-content img{
     width: 1.26rem;
+}
+.title_ear{
+	
+	position: relative;
+	
+}
+.title_two{
+	
+	position: absolute;
+	left: 50%;
+	transform: translate(0,-50%);
+	width: 7rem;
+	margin:auto;
+	
 }
 
