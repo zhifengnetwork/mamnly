@@ -452,14 +452,14 @@ class Image
 
             /* 头像 */
             case self::DCHQZG:
-              $x = 180;
-              $y = 50;
+              $x = 160;
+              $y = 40;
               break;
 
             /* QRCODE */
             case self::QRCODE:
-            $x = 180;
-            $y = 200;
+            $x = 130;
+            $y = 300;
             break;
               
 
