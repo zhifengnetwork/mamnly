@@ -2124,7 +2124,6 @@ class User extends MobileBase
         //看看头像是否为空
       
 
-
         $logic = new ShareLogic();
         $ticket = $logic->get_ticket($user_id);
 
@@ -2192,7 +2191,7 @@ class User extends MobileBase
         {
         	$image = \think\Image::open(ROOT_PATH.'public/share/bg.jpg');
         	// 给原图中间添加水印
-            $image->water($url_code,\think\Image::WATER_CENTER)->save(ROOT_PATH.'public/share/picture_ok44/'.$user_id.'.png');
+            $image->water($url_code,\think\Image::QRCODE)->save(ROOT_PATH.'public/share/picture_ok44/'.$user_id.'.png');
 
             // 给图片添加头像
             $images = \think\Image::open(ROOT_PATH."/public/share/picture_ok44/".$user_id.".png");
