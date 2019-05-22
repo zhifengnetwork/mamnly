@@ -210,6 +210,7 @@ body{
     height: .8rem;
     width: 7.1rem;
     /*margin: .3rem auto;*/
+     margin: 0 auto;
    
    
 }
@@ -232,7 +233,7 @@ body{
     
 }
 .recommend-wrap .title h3::before{
-    width: 2rem;
+    width: 2.1999rem;
     height: 0.03rem;
     margin-right: 0.1rem;
     content: '';
@@ -242,7 +243,7 @@ body{
   
 }
 .recommend-wrap .title h3::after{
-    width: 2rem;
+    width: 2.15rem;
     height: 0.03rem;
     margin-left: 0.1rem;
     content: '';
