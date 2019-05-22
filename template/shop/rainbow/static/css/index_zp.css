@@ -29,7 +29,7 @@ body{
     z-index: 99;
 }
 .header .scan img{
-    width: 0.48rem;
+    width: .7rem;
 }
 .header .search{
     width: 100%;
@@ -60,7 +60,7 @@ body{
     box-sizing: border-box;
 }
 .header .login-btn img{
-    width: 0.47rem;
+    width: .85rem;
 }
 
 /* 轮播图 */
