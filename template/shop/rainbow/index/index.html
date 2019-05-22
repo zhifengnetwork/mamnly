@@ -6,9 +6,9 @@
 	<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<title>首页-{$tpshop_config['shop_info_store_title']}</title>
 	<script src="__STATIC__/js/public/rem.js" type="text/javascript" charset="utf-8"></script>
-	<link rel="stylesheet" type="text/css" href="__STATIC__/css/reset.css?v=1111" />
-	<link rel="stylesheet" type="text/css" href="__STATIC__/css/swiper.min.css?v=1111" />
-	<link rel="stylesheet" type="text/css" href="__STATIC__/css/index_zp.css?v=1111" />
+	<link rel="stylesheet" type="text/css" href="__STATIC__/css/reset.css?v=1112" />
+	<link rel="stylesheet" type="text/css" href="__STATIC__/css/swiper.min.css?v=1112" />
+	<link rel="stylesheet" type="text/css" href="__STATIC__/css/index_zp.css?v=1112" />
 
 
 </head>
@@ -38,7 +38,7 @@
 
 		<!-- 轮播图 -->
 		<div class="swiper-container banner-wrap-zp">
-			8989ddsfdfd
+			
 			<div class="swiper-wrapper">
 				<adv pid="9" limit="5" item="v">
 					<div class="swiper-slide">
@@ -49,10 +49,10 @@
 				</adv>
 			</div>
 			<div class="swiper-pagination"></div>
-			<!-- 装饰条bg -->
+			 <!--装饰条bg--> 
 			<!--<div class="swiper-bg"><img src="__STATIC__/images/home_zp/swiper-bg.png" /></div>-->
 		</div>
-
+		
 		<!-- 菜单导航 -->
 		<div class="nav-wrap-zp">
 			<ul>
@@ -220,13 +220,21 @@
 			setInterval(setendTime, 1000);
 			// 首页轮播图
 			var swiper = new Swiper('.banner-wrap-zp', {
-				loop: true,
+				/*轮播项-循环*/
+        		loop: true,
+        		//设置自动循环播放
+//      		autoplay: {
+//      			/*时间间隔*/
+//					delay: 1000,
+//					/*允许客户操作后，自动轮播*/
+//					disableOnInteraction: false,
+//				},
 				pagination: '.swiper-pagination',
 				paginationClickable: true,
 				spaceBetween: 30,
-				autoplay: 3000,
 				autoplayDisableOnInteraction: false
 			});
+
 
 		})
 
