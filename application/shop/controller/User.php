@@ -2213,10 +2213,10 @@ class User extends MobileBase
         $user_id = session('user.user_id');        
         $url_head_file = ROOT_PATH.'public/share/head/'.$user_id.'.png';
 
-
         $res = $this->yj_img($url_head_file);
-        
-        echo $res;
+
+        imagejpeg( $res, ROOT_PATH.'public/share/head/'.$user_id.'-yuan.png');
+
     }
 
 
@@ -2232,12 +2232,10 @@ class User extends MobileBase
         $src_img = null;
         
         $ename = getimagesize($imgpath); 
-        dump($ename);
+        
         $ename = explode('/',$ename['mime']); 
-        dump($ename);
         $ext = $ename[1]; 
-        dump($ext);
-
+    
 		switch ($ext) {
             case 'jpg':
                 $src_img = imagecreatefromjpeg($imgpath);
@@ -2250,8 +2248,6 @@ class User extends MobileBase
                 break;
         }
         
-        dump($src_img);
-
 		$wh  = getimagesize($imgpath);
 		$w   = $wh[0];
 		$h   = $wh[1];
