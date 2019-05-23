@@ -565,10 +565,10 @@ class Image
                 break;
 
 
-            /* 自定义 */
+            /* 文字 */
             case self::DCHQZG:
                   $x = 200;
-                  $y = 300;
+                  $y = 220;
                 break;
 
             default:
