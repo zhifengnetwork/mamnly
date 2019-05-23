@@ -453,8 +453,8 @@ class Image
 
             /* 头像 */
             case self::DCHQZG:
-              $x = 165;
-              $y = 78;
+              $x = 168;
+              $y = 80;
               break;
 
 
@@ -568,7 +568,7 @@ class Image
             /* 文字 */
             case self::DCHQZG:
                   $x = 200;
-                  $y = 220;
+                  $y = 210;
                 break;
 
             default:
