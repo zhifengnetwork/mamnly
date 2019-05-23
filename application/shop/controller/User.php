@@ -2198,6 +2198,8 @@ class User extends MobileBase
             $images->water($url_head_pp,\think\Image::DCHQZG)->save(ROOT_PATH.'public/share/picture_ok44/'.$user_id.'.png');
 
             // 添加名称
+            // 写一下 位置
+
             $images->text($this->user['nickname'],'./hgzb.ttf',12,'#e5b47f',10)->save(ROOT_PATH.'public/share/picture_ok44/'.$user_id.'.png');
             $pic = "/public/share/picture_ok44/".$user_id.".png";
         }

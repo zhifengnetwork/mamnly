@@ -567,9 +567,11 @@ class Image
 
             /* 文字 */
             case self::DCHQZG:
-                  $x = 200;
-                  $y = 210;
+                $x += ($this->info['width'] - $w) / 2;
+                //居中
+                $y = 210;
                 break;
+
 
             default:
                 /* 自定义文字坐标 */
