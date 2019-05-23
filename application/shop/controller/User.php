@@ -2232,9 +2232,12 @@ class User extends MobileBase
         $src_img = null;
         
         $ename = getimagesize($imgpath); 
+        dump($ename);
         $ename = explode('/',$ename['mime']); 
+        dump($ename);
         $ext = $ename[1]; 
-
+        dump($ext);
+        
 		switch ($ext) {
             case 'jpg':
                 $src_img = imagecreatefromjpeg($imgpath);

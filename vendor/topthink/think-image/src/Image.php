@@ -450,16 +450,18 @@ class Image
                 $y = ($this->info['height'] - $info[1]) / 2;
                 break;
 
+
             /* 头像 */
             case self::DCHQZG:
               $x = 165;
-              $y = 39;
+              $y = 80;
               break;
+
 
             /* QRCODE */
             case self::QRCODE:
-            $x = 105;
-            $y = 302;
+            $x = 110;
+            $y = 350;
             break;
               
 
