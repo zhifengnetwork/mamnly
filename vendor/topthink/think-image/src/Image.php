@@ -454,14 +454,14 @@ class Image
             /* 头像 */
             case self::DCHQZG:
               $x = 165;
-              $y = 80;
+              $y = 78;
               break;
 
 
             /* QRCODE */
             case self::QRCODE:
             $x = 110;
-            $y = 350;
+            $y = 380;
             break;
               
 
@@ -563,10 +563,12 @@ class Image
             case self::WATER_WEST:
                 $y += ($this->info['height'] - $h) / 2;
                 break;
+
+
             /* 自定义 */
             case self::DCHQZG:
                   $x = 200;
-                  $y = 150;
+                  $y = 300;
                 break;
 
             default:
