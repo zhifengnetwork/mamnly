@@ -2154,7 +2154,7 @@ class User extends MobileBase
         if($logo_url_logo_height > 420 || $logo_url_logo_width > 420){
             //压缩二维码图片
             $url_code = ROOT_PATH.'public/share/code/'.$user_id.'.jpg';
-            $logo_url->thumb(200, 200)->save($url_code , null, 100);
+            $logo_url->thumb(195, 195)->save($url_code , null, 100);
         }
 
         //2.头像
