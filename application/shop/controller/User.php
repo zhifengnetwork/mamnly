@@ -2124,6 +2124,35 @@ class User extends MobileBase
         //看看头像是否为空
       
 
+        define('IMGROOT_PATH', str_replace("\\","/",realpath(dirname(dirname(__FILE__)).'/../../'))); //图片根目录（绝对路径）
+       
+        //加上 refresh == 1 , 强制重新获取海报
+        if(I('refresh') == '1'){
+            //删掉文件
+            @unlink(IMGROOT_PATH.'/public/share/head/'.$user_id.'.jpg');//删除头像
+            @unlink(IMGROOT_PATH.'/public/share/head/'.$user_id.'.png');//删除头像
+
+            @unlink(IMGROOT_PATH.'/public/share/picture_ok44/'.$user_id.'.jpg');//删除 44
+
+
+            //强制获取头像
+            $openid = session('user.openid');
+            $access_token = access_token();
+            $url = 'https://api.weixin.qq.com/cgi-bin/user/info?access_token='.$access_token.'&openid='.$openid.'&lang=zh_CN';
+            $resp = httpRequest($url, "GET");
+            $res = json_decode($resp, true);
+           
+            $head_pic = $res['headimgurl'];
+            if($head_pic){
+                //得到头像
+                M('users')->where(['openid'=>$openid])->update(['head_pic'=>$head_pic]);
+                session('user.head_pic',$head_pic);
+            }
+        }
+
+
+
+
         $logic = new ShareLogic();
         $ticket = $logic->get_ticket($user_id);
 
@@ -2154,7 +2183,7 @@ class User extends MobileBase
         if($logo_url_logo_height > 420 || $logo_url_logo_width > 420){
             //压缩二维码图片
             $url_code = ROOT_PATH.'public/share/code/'.$user_id.'.jpg';
-            $logo_url->thumb(195, 195)->save($url_code , null, 100);
+            $logo_url->thumb(210, 200)->save($url_code , null, 100);
         }
 
         //2.头像
@@ -2178,7 +2207,7 @@ class User extends MobileBase
         if($logo_height > 100 || $logo_width > 100){
             // 压缩图片
              $url_head_file = ROOT_PATH.'public/share/head/'.$user_id.'.png';
-             $logo->thumb(83, 83)->save($url_head_file , null, 50);
+             $logo->thumb(90, 90)->save($url_head_file , null, 50);
         }
 
         //3.得到二维码的绝对路径
@@ -2189,17 +2218,15 @@ class User extends MobileBase
         }
         else
         {
-        	$image = \think\Image::open(ROOT_PATH.'public/share/bg.png');
+        	$image = \think\Image::open(ROOT_PATH.'public/share/bg1.png');
         	// 给原图中间添加水印
-            $image->water($url_code,\think\Image::QRCODE)->save(ROOT_PATH.'public/share/picture_ok44/'.$user_id.'.png');
+            $image->water($url_code,\think\Image::WATER_CENTER)->save(ROOT_PATH.'public/share/picture_ok44/'.$user_id.'.png');
 
             // 给图片添加头像
             $images = \think\Image::open(ROOT_PATH."/public/share/picture_ok44/".$user_id.".png");
             $images->water($url_head_pp,\think\Image::DCHQZG)->save(ROOT_PATH.'public/share/picture_ok44/'.$user_id.'.png');
 
             // 添加名称
-            // 写一下 位置
-
             $images->text($this->user['nickname'],'./hgzb.ttf',12,'#e5b47f',10)->save(ROOT_PATH.'public/share/picture_ok44/'.$user_id.'.png');
             $pic = "/public/share/picture_ok44/".$user_id.".png";
         }
@@ -2208,4 +2235,36 @@ class User extends MobileBase
      
         return $this->fetch();
     }
+
+    public function fen()
+    {
+        $user_id = session('user.user_id');
+        $url = SITE_URL.'?first_leader='.$user_id;
+        $this->assign('url',$url);
+        $qr_back = M('config')->where(['name'=>'qr_back'])->value('value');
+        $this->assign('qr_back',$qr_back);
+
+        $head_pic = session('user.head_pic');
+        $this->assign('head_pic',$head_pic);
+
+        $nickname = session('user.nickname');
+        $this->assign('nickname',$nickname);
+
+        return $this->fetch();
+    }
+
+
+    // public function logout()
+    // {
+    //     session_unset();
+    //     session_destroy();
+    //     setcookie('uname','',time()-3600,'/');
+    //     setcookie('cn','',time()-3600,'/');
+    //     setcookie('user_id','',time()-3600,'/');
+    //     setcookie('PHPSESSID','',time()-3600,'/');
+    //     //$this->success("退出成功",U('Mobile/Index/index'));
+    //     header("Location:" . U('Mobile/Index/index'));
+    //     exit();
+    // }
+
 }

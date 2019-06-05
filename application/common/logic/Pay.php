@@ -392,10 +392,10 @@ class Pay
 
         if ($this->payList[0]['goods']->sign_free_receive != 0 ) {
 
-            if ( $this->user['is_code'] == 1 && $this->payList[0]['goods']->sign_free_receive == 2) {
+            if ( $this->user['is_code'] == 1 && $this->payList[0]['goods']->sign_free_receive == 1) {
 
                 // 能否领取商品
-                $data = M('order_sign_receive')->where(['uid' => $this->user['user_id'], 'type' => 2])->select();
+                $data = M('order_sign_receive')->where(['uid' => $this->user['user_id'], 'type' => 1])->select();
 
                 //扫码只可领取1次
                 if (!empty($data)) {
@@ -411,7 +411,7 @@ class Pay
             }
             
             if($isReceive['status'] == 2){
-                if ($this->payList[0]['goods']->sign_free_receive == 2) {
+                if ($this->payList[0]['goods']->sign_free_receive == 2 ) {
                     // 免费领取
                     $this->orderAmount = $this->orderAmount - $this->payList[0]['goods']->shop_price * $this->totalNum; // 应付金额
                     $this->totalAmount = $this->totalAmount - $this->payList[0]['goods']->shop_price * $this->totalNum;

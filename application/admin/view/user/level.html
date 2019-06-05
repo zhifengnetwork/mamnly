@@ -101,7 +101,7 @@
 			</dl>
 			<dl class="row">
 			    <dt class="tit">
-			        <label for="level_name">领取鱼子面膜数量/盒</label>
+			        <label for="level_name">领取A面膜数量/盒</label>
 			    </dt>
 			    <dd class="opt">
 			        <input type="text" name="get_num" value="{$info.get_num}" id="get_num" class="input-txt" onkeyup="this.value=this.value.replace(/[^\d]/g,'')">
@@ -110,7 +110,7 @@
 			</dl>
             <dl class="row">
                 <dt class="tit">
-                    <label for="level_name">领取多肽面膜数量/盒</label>
+                    <label for="level_name">领取B面膜数量/盒</label>
                 </dt>
                 <dd class="opt">
                     <input type="text" name="receive_num" value="{$info.receive_num}" id="receive_num" class="input-txt" onkeyup="this.value=this.value.replace(/[^\d]/g,'')">
@@ -120,54 +120,54 @@
 			<if condition="$info['level'] eq 4">
 			<dl class="row">
                 <dt class="tit">
-                    直属店主邀店主
+                    直属合伙人邀合伙人
                 </dt>
                 <dd class="opt">
                          <input type="text" name="y_reward" value="{$info.y_reward}" id="discount" class="input-txt" onkeyup="this.value=this.value.replace(/[^\d]/g,'')">
                     <span class="err" id="err_describe"></span>
-                    <p class="notic">直属店主邀店主得到奖励</p>
+                    <p class="notic">直属合伙人邀合伙人得到奖励</p>
                 </dd>
             </dl>
-            </if>
+            </if>       
             <if condition="$info['level'] eq 5">
 			<dl class="row">
                 <dt class="tit">
-                   直属店主邀店主
+                   直属合伙人邀合伙人
                 </dt>
                 <dd class="opt">
                          <input type="text" name="y_reward" value="{$info.y_reward}" id="discount" class="input-txt" onkeyup="this.value=this.value.replace(/[^\d]/g,'')">
                     <span class="err" id="err_describe"></span>
-                    <p class="notic">直属店主邀店主得到奖励</p>
+                    <p class="notic">直属合伙人邀合伙人得到奖励</p>
                 </dd>
             </dl>
             <dl class="row">
                 <dt class="tit">
-                   直属总监邀店主
+                   直属联合创始人邀合伙人
                 </dt>
                 <dd class="opt">
                          <input type="text" name="s_reward" value="{$info.s_reward}" id="discount" class="input-txt" onkeyup="this.value=this.value.replace(/[^\d]/g,'')">
                     <span class="err" id="err_describe"></span>
-                    <p class="notic">总监的店主邀店主得到奖励</p>
+                    <p class="notic">联合创始人的合伙人邀合伙人得到奖励</p>
                 </dd>
             </dl>
               <dl class="row">
                 <dt class="tit">
-                   直属总监邀店主(有平级总监)
+                   直属联合创始人邀合伙人(有平级联合创始人)
                 </dt>
                 <dd class="opt">
                          <input type="text" name="h_reward" value="{$info.h_reward}" id="discount" class="input-txt" onkeyup="this.value=this.value.replace(/[^\d]/g,'')">
                     <span class="err" id="err_describe"></span>
-                    <p class="notic">总监的店主邀店主得到奖励（有平级总监）</p>
+                    <p class="notic">联合创始人的合伙人邀合伙人得到奖励（有平级联合创始人）</p>
                 </dd>
             </dl>
                 <dl class="row">
                 <dt class="tit">
-                   直属总监的店主邀店主
+                   直属联合创始人的合伙人邀合伙人
                 </dt>
                 <dd class="opt">
                          <input type="text" name="k_reward" value="{$info.k_reward}" id="discount" class="input-txt" onkeyup="this.value=this.value.replace(/[^\d]/g,'')">
                     <span class="err" id="err_describe"></span>
-                    <p class="notic">直属总监的店主邀店主得到奖励</p>
+                    <p class="notic">直属联合创始人的合伙人邀合伙人得到奖励</p>
                 </dd>
             </dl>
             </if>
@@ -189,7 +189,7 @@
                 <dd class="opt">
                          <input type="text" name="pin_reward" value="{$info.pin_reward}" id="discount" class="input-txt" onkeyup="this.value=this.value.replace(/[^\d]/g,'')">
                     <span class="err" id="err_describe"></span>
-                    <p class="notic">总监直邀店主的平级奖</p>
+                    <p class="notic">联合创始人直邀合伙人的平级奖</p>
                 </dd>
                   <dt class="tit">
                    平级奖2
@@ -197,7 +197,7 @@
                 <dd class="opt">
                          <input type="text" name="pin_reward2" value="{$info.pin_reward2}" id="discount" class="input-txt" onkeyup="this.value=this.value.replace(/[^\d]/g,'')">
                     <span class="err" id="err_describe"></span>
-                    <p class="notic">总监直属店主邀店主的平级奖</p>
+                    <p class="notic">联合创始人直属合伙人邀合伙人的平级奖</p>
                 </dd>
 
             </if>
@@ -219,7 +219,7 @@
                 <dd class="opt">
                          <input type="text" name="pin_reward" value="{$info.pin_reward}" id="discount" class="input-txt" onkeyup="this.value=this.value.replace(/[^\d]/g,'')">
                     <span class="err" id="err_describe"></span>
-                    <p class="notic">大区直邀店主的平级奖</p>
+                    <p class="notic">执行董事直邀合伙人的平级奖</p>
                 </dd>
                   <dt class="tit">
                    平级奖2
@@ -227,7 +227,7 @@
                 <dd class="opt">
                          <input type="text" name="pin_reward2" value="{$info.pin_reward2}" id="discount" class="input-txt" onkeyup="this.value=this.value.replace(/[^\d]/g,'')">
                     <span class="err" id="err_describe"></span>
-                    <p class="notic">大区直属总监的店主邀店主的平级奖</p>
+                    <p class="notic">执行董事直属联合创始人的合伙人邀合伙人的平级奖</p>
                 </dd>
                     <dt class="tit">
                    平级奖3
@@ -235,7 +235,7 @@
                 <dd class="opt">
                          <input type="text" name="pin_reward3" value="{$info.pin_reward3}" id="discount" class="input-txt" onkeyup="this.value=this.value.replace(/[^\d]/g,'')">
                     <span class="err" id="err_describe"></span>
-                    <p class="notic">大区直属店主邀店主的平级奖</p>
+                    <p class="notic">执行董事直属合伙人邀合伙人的平级奖</p>
 
                 </dd>
                 <dt class="tit">
@@ -245,7 +245,7 @@
                 <dd class="opt">
                          <input type="text" name="pin_reward4" value="{$info.pin_reward4}" id="discount" class="input-txt" onkeyup="this.value=this.value.replace(/[^\d]/g,'')">
                     <span class="err" id="err_describe"></span>
-                    <p class="notic">大区直属总监邀店主的平级奖</p>
+                    <p class="notic">执行董事直属联合创始人邀合伙人的平级奖</p>
                 </dd>
                 <dt class="tit">
                    平级领导奖
@@ -254,7 +254,7 @@
                 <dd class="opt">
                          <input type="text" name="lead_reward" value="{$info.lead_reward}" id="discount" class="input-txt" onkeyup="this.value=this.value.replace(/[^\d]/g,'')">
                     <span class="err" id="err_describe"></span>
-                    <p class="notic">大区平级奖</p>
+                    <p class="notic">执行董事平级奖</p>
                 </dd>
 
             </if>

@@ -8,7 +8,7 @@ use think\Db;
 use think\Controller;
 
 
-class Sign extends Controller
+class Sign extends ApiBase
 {
 
     public function ajaxReturn($data){
@@ -21,114 +21,19 @@ class Sign extends Controller
      */
     public function sign()
     {
-        $user_model = new Users();
-        $user_id = I('user_id');
-        if (!$user_id) {
-            return $this->ajaxReturn(['status' => -1, 'msg' => '签到user_id不能为空']);
-        }
-        $con['sign_day'] = array('like', date('Y-m-d', time()).'%');
-        $cunzai = M('sign_log')->where(['user_id' => $user_id])->where($con)->find();
-        $date = $this->deal_time(date('Y-m-d H:i:s', time()));
-        if ($cunzai) {
-            return $this->ajaxReturn(['status' => 1, 'msg' => '今日已签到', 'date' => $date]);
-        }
-
-        Db::startTrans();
-        try{
-
-            $r = M('sign_log')->save(['user_id' => $user_id, 'sign_day' => date('Y-m-d H:i:s')]);
-            $user = $user_model->where(['user_id' => $user_id])->field('is_agent,super_nsign,is_distribut')->find();
-            //获取后台设置的签到天数
-            $sign_distribut_days = M('config')->where(['name' => 'sign_distribut_days'])->value('value');
-            $sign_agent_days = M('config')->where(['name' => 'sign_agent_days'])->value('value');
-            //代理类型
-
-            //更改成是否  有资格
-            // is_agent
-            if ($user['super_nsign'] == 1) {
-                //查询签到记录看已经连续签到是次数是否达到了设置的值
-                $agent_continue_sign_num = $this->goods_continue_sign($user_id, 'sign_agent');
-                if ($agent_continue_sign_num >= $sign_agent_days) {
-
-                    //使得user表中代理领礼物次数+1
-                    $agent_free_num = $user_model->where(['user_id' => $user_id])->value('agent_free_num');
-                   
-                    $agent_free_num = (int) $agent_free_num + 1;
-                    $user_model->where(['user_id' => $user_id])->update(['agent_free_num' => $agent_free_num]);
-
-                    // //变更这几次的签到记录中的标志值
-                    M('sign_log')->where(['user_id' => $user_id])->order('sign_day desc')->limit($sign_agent_days)->update(['sign_agent' => 1]);
-
-                    // 写日志
-                    $log = array(
-                        'user_id' => $user_id,
-                        'type' => 'AGENT'
-                    );
-                    M('log_receive_sign_free')->add($log);
-                }
-            }
-
-            //分销员类型
-            if ($user['is_distribut'] == 1) {
-                //查询签到记录看已经连续签到是次数是否达到了设置的值
-                $distribut_continue_sign_num = $this->goods_continue_sign($user_id, 'sign_distribut');
-                //echo '|||||||||||||||||'.$distribut_continue_sign_num;die;
-                if ($distribut_continue_sign_num >= $sign_distribut_days) {
-                    //使得user表中代理领礼物次数+1
-                    //M('user')->where(['user_id'=>$user_id])->save(['distribut_free_num'=>'distribut_free_num+1']);
-
-                    $distribut_free_num = M('users')->where(['user_id' => $user_id])->value('distribut_free_num');
-
-                    $distribut_free_num = (int) $distribut_free_num + 1;
-
-                    $user_model->where(['user_id' => $user_id])->save(['distribut_free_num' => $distribut_free_num]);
-
-                    // //变更这几次的签到记录中的标志值
-                    M('sign_log')->where(['user_id' => $user_id])->order('sign_day desc')->limit($sign_distribut_days)->save(['sign_distribut' => 1]);
-
-                    // 写日志
-                    $log = array(
-                        'user_id' => $user_id,
-                        'type' => 'DISTRIBUT'
-                    );
-                    M('log_receive_sign_free')->add($log);
-                }
-            }
-
-            // 提交事务
-            Db::commit();    
-            return $this->ajaxReturn(['status' => 1, 'msg' => '签到成功', 'date' => $date,'a'=> $agent_free_num,'d'=>$distribut_free_num]);
-
-        } catch (\Exception $e) {
-            // 回滚事务
-            Db::rollback();
-            return $this->ajaxReturn(['status' => -1, 'msg' => '签到失败', 'date' => $date]);
-
-        }
+		$user_id = I('user_id');
+		return $this->ajaxReturn($this->sign_in($user_id));
 
     }
 
     /**
-     * 获取签到的日期列表.
+     * APP签到.
      */
-    public function get_sign_day()
-    {
-        $user_id = I('user_id');
-        if (!$user_id) {
-            return $this->ajaxReturn(['status' => -1, 'msg' => 'user_id不能为空', 'data' => '']);
-        }
-        $list = M('sign_log')->where(['user_id' => $user_id])->field('sign_day')->select();
-        foreach ($list as $k => $v) {
-            $data[$k] = $this->deal_time($v['sign_day']);
-        }
-
-        $con['sign_day'] = array('like', date('Y-m-d', time()).'%');
-        $cunzai = M('sign_log')->where(['user_id' => $user_id])->where($con)->find();
-
-        if ($cunzai) {
-            $today_sign = true;
-        } else {
-            $today_sign = false;
+    public function AppSign()
+    {	
+		$user_id = $this->get_user_id();
+        if(!$user_id){
+            $this->ajaxReturn(['status' => -1 , 'msg'=>'用户不存在','data'=>null]);
         }
 
         //当前积分
@@ -139,28 +44,45 @@ class Sign extends Controller
         //签到积分
         $add_point = (int) M('config')->where(['name' => 'sign_integral'])->value('value');
 
-        //签到规则
+		$data = $this->sign_in($user_id);
+		$data['status'] = ($data['status'] == 1) ? 0 : $data['status'];
+		$data['data'] = ['time'=>$data['date'],'points'=>$points,'continue_sign'=>$continue_sign,'add_point'=>$add_point];
+		unset($data['date']);
+		return $this->ajaxReturn($data);
 
-        $rule = M('config')->where(['name' => 'sign_rule'])->value('value');
+    }
 
-        //拢共签到几天
-        $accumulate_day = count($data);
+    /**
+     * 获取签到的日期列表.
+     */
+    public function get_sign_day()
+    {
+        $user_id = I('user_id',0);
+		$data = $this->get_sign_days($user_id);
+        return $this->ajaxReturn($data);
+    }
 
-        //检查权限
-        $auth = $this->check_auth($user_id);
-
-        return $this->ajaxReturn(
-            ['status' => 1,
-            'msg' => '获取成功',
-            'data' => $data,
-            'today_sign' => $today_sign,
-            'points' => $points,
-            'add_point' => $add_point,
-            'continue_sign' => $continue_sign,
-            'accumulate_day' => $accumulate_day,
-            'note' => $rule,
-            'auth' => $auth,
-            ]);
+    /**
+     * APP获取签到的日期列表.
+     */
+    public function AppGetSignDay()
+    {	
+		$user_id = $this->get_user_id();
+        if(!$user_id){
+            $this->ajaxReturn(['status' => -1 , 'msg'=>'用户不存在','data'=>null]);
+        }
+		$data = $this->get_sign_days($user_id);
+		$data = [
+			'date'	=> $data['data'],
+			'today_sign'	=> $data['today_sign'],
+			'points'	=> $data['points'],
+			'add_point'	=> $data['add_point'],
+			'continue_sign'	=> $data['continue_sign'],
+			'accumulate_day'	=> $data['accumulate_day'],
+			'note'	=> $data['note'],
+			'auth'	=> $data['auth'],
+		];
+        return $this->ajaxReturn(['status' => 0 , 'msg'=>'请求成功','data'=>$data]);
     }
 
     /**
@@ -171,8 +93,8 @@ class Sign extends Controller
         //检查身份
         //只有  分销 和 （购买399可以签到） 可以签到
         //   super_nsign   用户表  = 1
-        $is_ok = M('users')->where(['user_id' => $user_id])->field('level,super_nsign')->find();
-        if ($is_ok['level'] >= 3 || $is_ok['super_nsign'] == 1) {
+        $is_ok = M('users')->where(['user_id' => $user_id])->field('is_distribut,super_nsign')->find();
+        if ($is_ok['is_distribut'] == 1 || $is_ok['super_nsign'] == 1) {
             return 1;
         } else {
             return 0;
@@ -251,4 +173,141 @@ class Sign extends Controller
 
         return $countSign;
     }
+
+	//------------------------------------------------------------------
+	private function sign_in($user_id){
+        $user_model = new Users();
+        if (!$user_id) {
+            return ['status' => -1, 'msg' => '签到user_id不能为空'];
+        }
+        $con['sign_day'] = array('like', date('Y-m-d', time()).'%');
+        $cunzai = M('sign_log')->where(['user_id' => $user_id])->where($con)->find();
+        $date = $this->deal_time(date('Y-m-d H:i:s', time()));
+        if ($cunzai) {
+            return ['status' => 1, 'msg' => '今日已签到', 'date' => $date];
+        }
+		
+		$auth = $this->check_auth($user_id);
+		if(!$auth)return ['status' => -1, 'msg' => '您还没有签到权限', 'date' => null];
+        Db::startTrans();
+        try{
+
+            $r = M('sign_log')->save(['user_id' => $user_id, 'sign_day' => date('Y-m-d H:i:s')]);
+            $user = $user_model->where(['user_id' => $user_id])->field('is_agent,super_nsign,is_distribut')->find();
+            //获取后台设置的签到天数
+            $sign_distribut_days = M('config')->where(['name' => 'sign_distribut_days'])->value('value');
+            $sign_agent_days = M('config')->where(['name' => 'sign_agent_days'])->value('value');
+            //代理类型
+
+            //更改成是否  有资格
+            // is_agent
+            if ($user['super_nsign'] == 1) {
+                //查询签到记录看已经连续签到是次数是否达到了设置的值
+                $agent_continue_sign_num = $this->goods_continue_sign($user_id, 'sign_agent');
+                if ($agent_continue_sign_num >= $sign_agent_days) {
+
+                    //使得user表中代理领礼物次数+1
+                    $agent_free_num = $user_model->where(['user_id' => $user_id])->value('agent_free_num');
+                   
+                    $agent_free_num = (int) $agent_free_num + 1;
+                    $user_model->where(['user_id' => $user_id])->update(['agent_free_num' => $agent_free_num]);
+
+                    // //变更这几次的签到记录中的标志值
+                    M('sign_log')->where(['user_id' => $user_id])->order('sign_day desc')->limit($sign_agent_days)->update(['sign_agent' => 1]);
+
+                    // 写日志
+                    $log = array(
+                        'user_id' => $user_id,
+                        'type' => 'AGENT'
+                    );
+                    M('log_receive_sign_free')->add($log);
+                }
+            }
+
+            //分销员类型
+            if ($user['is_distribut'] == 1) {
+                //查询签到记录看已经连续签到是次数是否达到了设置的值
+                $distribut_continue_sign_num = $this->goods_continue_sign($user_id, 'sign_distribut');
+               
+                if ($distribut_continue_sign_num >= $sign_distribut_days) {
+                    //使得user表中代理领礼物次数+1
+                    //M('user')->where(['user_id'=>$user_id])->save(['distribut_free_num'=>'distribut_free_num+1']);
+
+                    $distribut_free_num = M('users')->where(['user_id' => $user_id])->value('distribut_free_num');
+
+                    $distribut_free_num = (int) $distribut_free_num + 1;
+
+                    $user_model->where(['user_id' => $user_id])->save(['distribut_free_num' => $distribut_free_num]);
+
+                    // //变更这几次的签到记录中的标志值
+                    M('sign_log')->where(['user_id' => $user_id])->order('sign_day desc')->limit($sign_distribut_days)->save(['sign_distribut' => 1]);
+
+                    // 写日志
+                    $log = array(
+                        'user_id' => $user_id,
+                        'type' => 'DISTRIBUT'
+                    );
+                    M('log_receive_sign_free')->add($log);
+                }
+            }
+
+            // 提交事务
+            Db::commit();    
+            return ['status' => 1, 'msg' => '签到成功', 'date' => $date,'a'=> $agent_free_num,'d'=>$distribut_free_num];
+
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            return ['status' => -1, 'msg' => '签到失败', 'date' => $date];
+
+        }	
+	}
+
+	private function get_sign_days($user_id){
+        if (!$user_id) {
+            return ['status' => -1, 'msg' => 'user_id不能为空', 'data' => null];
+        }
+        $list = M('sign_log')->where(['user_id' => $user_id])->field('sign_day')->select();
+        foreach ($list as $k => $v) {
+            $data[$k] = $this->deal_time($v['sign_day']);
+        }
+
+        $con['sign_day'] = array('like', date('Y-m-d', time()).'%');
+        $cunzai = M('sign_log')->where(['user_id' => $user_id])->where($con)->find();
+        if ($cunzai) {
+            $today_sign = true;
+        } else {
+            $today_sign = false;
+        }
+
+        //当前积分
+        $points = M('users')->where(['user_id' => $user_id])->value('pay_points');
+        //连续签到几天
+        $continue_sign = continue_sign($user_id);
+
+        //签到积分
+        $add_point = (int) M('config')->where(['name' => 'sign_integral'])->value('value');
+
+        //签到规则
+
+        $rule = M('config')->where(['name' => 'sign_rule'])->value('value');
+
+        //拢共签到几天
+        $accumulate_day = count($data);
+
+        //检查权限
+        $auth = $this->check_auth($user_id);
+
+        return ['status' => 1,
+            'msg' => '获取成功',
+            'data' => $data,
+            'today_sign' => $today_sign,
+            'points' => $points,
+            'add_point' => $add_point,
+            'continue_sign' => $continue_sign,
+            'accumulate_day' => $accumulate_day,
+            'note' => $rule,
+            'auth' => $auth,
+            ];	
+	}
 }

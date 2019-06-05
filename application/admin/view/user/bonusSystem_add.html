@@ -54,7 +54,24 @@
 					<span class="err" id="err_rate"></span>
 			        <p class="notic">设置业绩分红率,不填为无分红！</p>
 			    </dd>
-			</dl>
+            </dl>
+            
+            <dl class="row">
+                <dt class="tit">
+                    <label for="amount"><em>*</em>分红等级</label>
+                </dt>
+                <dd class="opt">
+					<div style="margin-bottom: 10px;">
+					<select name="level" id="leve">
+                        <option value="0">选择条件</option>
+                        <volist name='levellist' id='v'>
+                            <option value="{$v['level']}" <if condition="$v['level'] eq $info['level']"> selected</if>>{$v['level_name']}</option>               
+                        </volist>
+					</select>
+					</div>
+                </dd>
+            </dl>
+
 			<dl class="row">
 			    <dt class="tit">
 			        业绩描述

@@ -4,14 +4,29 @@
  */
 namespace app\api\controller;
 use app\common\model\Users;
-
+use app\common\logic\LevelLogic;
 use app\common\logic\UsersLogic;
+
 use think\Db;
 use think\Controller;
 
 
 class Distribut extends Controller
 {
+
+    /**
+     * api调用 升级
+     */
+    public function upgrade(){
+        $user_id = I('user_id');
+        if(!$user_id){
+            return 'user_id不存在';
+        }
+
+        $top_level = new LevelLogic();
+        $top_level->user_in($user_id);
+        
+    }
 
     /**
      * 获取团队总人数
@@ -80,93 +95,19 @@ class Distribut extends Controller
         return $total + $mun;
     }
 
-
+    /**
+     * 通过 user_id  查  所有
+     */
     public function get_team_num(){
+        ini_set('max_execution_time', '0');
         $user_id = I('user_id');
         if(!$user_id){
             echo 0;
+            exit;
         }
         $logic = new UsersLogic();
-        $arr = [];
-        $res = $logic->getUserLevBotAll($user_id,$arr);
-        $num = count($res);
-        M('users')->where(['user_id'=>$user_id])->update(['underling_number'=>$num]);
+        $num = $logic->get_team_num($user_id);
         echo $num;
     }
-
-    /**
-     * 通过 user_id  查  所有
-     * 【 不行 】
-     */
-    public function get_team_num55555555(){
-        ini_set('max_execution_time', '0');
-
-        $user_id = I('user_id');
-        $all = M('users')->field('user_id,first_leader')->select();
-
-        $values = [];
-        foreach ($all as $item) {
-            $values[$item['first_leader']][] = $item;
-        }
-        //foreach ($all as $k => $v) {
-            $coumun = $this->membercount($user_id, $values);
-            
-            //M('users')->where(['user_id'=>$v['user_id']])->update(['underling_number'=>$coumun]);
-            //$coumun += $coumun;
-       // }
-        
-       M('users')->where(['user_id'=>$user_id])->update(['underling_number'=>$coumun]);
-        
-       echo $coumun;
-       
-    }
-
-
-    public function membercount($id, $data)
-    {
-        $count = 0;
-        $num = count($data[$id]);
-        if (empty($data[$id])) {
-            return $num;
-        } else {
-            $mun = 0;
-            foreach ($data[$id] as $key => $value) {
-                if (empty($data[$value['user_id']])) {
-                    continue;
-                } else {
-                    $mun += intval($this->membercount($value['user_id'], $data));
-                }
-            }
-            $num += $count;
-        }
-        return $num + $mun;
-    }
-
-
-    /**
-     * 获取团队总人数
-     */
-    public function aaaaaaa(){
-        dump($this->getAlldp_p(10968740));
-    }
-
-    /*
-    * 获取所有下级
-    */
-   public function getAlldp_p($invite_id,&$userList=array())
-   {           
-       $field  = "user_id";
-       $UpInfo = M('users')->field($field)->where(['first_leader'=>$invite_id])->select();
-
-       if($UpInfo){
-            foreach ($UpInfo as $key => $value) {
-                $userList[] = $value;
-                $this->getAlldp_p($value['user_id'],$userList);
-            }
-       }
-       
-       return $userList;
-   }
-
 
 }

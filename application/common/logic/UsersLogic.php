@@ -255,10 +255,10 @@ class UsersLogic extends Model
 	{
 		write_log("newopenid=".$data['openid']);
 	  
-		if (!$data['openid'] || !$data['oauth']) {
+		if (!$data['openid'] || !$data['oauth'] || !$data['old_openid']) {
 			return array('status' => -1, 'msg' => '参数有误openid或oauth丢失', 'result' => 'aaa');
 		}
-		//write_log("oldopenid=".$data['old_openid']);
+		write_log("oldopenid=".$data['old_openid']);
 		// $user2 = session('user');
 		// if (!empty($user2)) {
 		//     $r = $this->oauth_bind($data);//绑定账号
@@ -284,7 +284,7 @@ class UsersLogic extends Model
 			$map['reg_time'] = time();
 			$map['oauth'] = $data['oauth'];
 			//$map['first_leader'] = $data['first_leader'];
-			$map['head_pic'] = !empty($data['head_pic']) ? $data['head_pic'] : '/public/images/icon_goods_thumb_empty_300.png?v=1';
+			$map['head_pic'] = !empty($data['head_pic']) ? $data['head_pic'] : '/public/images/icon_goods_thumb_empty_300.png';
 			$map['sex'] = $data['sex'] === null ? 0 :  $data['sex'];
 			// $map['first_leader'] = cookie('first_leader'); // 推荐人id
 			
@@ -295,22 +295,45 @@ class UsersLogic extends Model
 			// } 
 
 			$is_cunzai = Db::name('users')->where(array('openid'=>$data['openid']))->find();
-			//$time=date("Y-m-d H:i:s");
-            //write_log('新注册：openid'.$data['openid'].'--name--'.$data['nickname'].'time'.$time.'访问ip地址：' . $request->ip());
+			$time=date("Y-m-d H:i:s");
+            write_log('新注册：openid'.$data['openid'].'--name--'.$data['nickname'].'time'.$time.'访问ip地址：' . $request->ip());
 			
 			if(!empty($is_cunzai)){
-
- 				 Db::name('users')->where(array('openid'=>$map['openid']))->update($map);
-                $row_id = $is_cunzai['user_id'];
-				
-				//$row_id = $is_cunzai['user_id'];
+			 	write_log('新注册数据查询1：openid='.$is_cunzai['openid'].'--name--'.$is_cunzai['nickname'].'time'.$time.'==data_openid'.$data['openid'].'访问ip地址：' . $request->ip());
+				$map['sign_old_openid'] = 555;
+				Db::name('users')->where(array('openid'=>$map['openid']))->update($map);
+				$row_id = $is_cunzai['user_id'];
 					
 			}else{
-              
-                 $row_id = Db::name('users')->add($map);
 
-            }
+				$old_user = Db::name('users')->where(['old_openid'=>$data['old_openid']])->find();
+				$matched_user = Db::name('users')->where('openid','<>',$old_user['old_openid'])->find();
+				//if(!empty($matched_user))
+				if($old_user['old_openid']!=$old_user['openid'])
+				{
+					//新用户
+					$map['sign_old_openid'] = 7777;
+					$row_id = Db::name('users')->add($map);
+				}else{
 
+				  	write_log('新注册数据查询2：old_openid='.$old_user['old_openid'].'--name--'.$old_user['nickname'].'time'.$time.'==data_old_openid'.$data['old_openid'].'访问ip地址：' . $request->ip());
+				 
+					if(!empty($old_user)){
+						
+						$map['sign_old_openid'] = 222;
+						Db::name('users')->where(array('user_id'=>$old_user['user_id']))->update($map);
+						$row_id = $old_user['user_id'];
+
+					}else{
+				
+						//新用户
+						$map['sign_old_openid'] = 111;
+						$row_id = Db::name('users')->add($map);
+					}
+				}
+
+
+			}
 
 
 			$user = Db::name('users')->where(array('user_id'=>$row_id))->find();
@@ -346,11 +369,49 @@ class UsersLogic extends Model
 			
 		} else {
 			$map['head_pic'] = !empty($data['head_pic']) ? $data['head_pic'] : '/public/images/icon_goods_thumb_empty_300.png';
+            $time=date("Y-m-d H:i:s");
+             write_log('已注册：openid'.$data['openid'].'--name--'.$data['nickname'].'time'.$time.'访问ip地址：' . $request->ip());
+			$is_cunzai_data = Db::name('users')->where(array('openid'=>$data['openid']))->find();
 
+			if(!empty($is_cunzai_data)){
+				write_log('已注册数据查询1：openid='.$is_cunzai_data['openid'].'--name--'.$is_cunzai_data['nickname'].'time'.$time.'访问ip地址：' . $request->ip());
+				$map['sign_old_openid'] = 6666;
+				Db::name('users')->where('openid', $data['openid'])->save($map);
+		
+			}else {
+
+			  $time=date("Y-m-d H:i:s");
+              write_log('已注册：old_openid'.$data['old_openid'].'--name--'.$data['nickname'].'time'.$time.'访问ip地址：' . $request->ip());
+			 	//查找是否已有老数据
+				$old_user = Db::name('users')->where(['old_openid'=>$data['old_openid']])->find();
+				$sql =Db::name('users')->getlastsql();
+				write_log($sql);
+				write_log('已注册数据查询2：old_openid='.$old_user['old_openid'].'--name--'.$old_user['nickname'].'time'.$time.'---openid---'.$data['old_openid'].'访问ip地址：' . $request->ip());
+				if($old_user){
+					write_log('已找到老数据');
+					//更新老数据并删除新注册的数据
+					$map['openid'] = $data['openid'];
+					$map['is_code'] = $user['is_code'];
+					if(empty($user['first_leader'])|| $user['first_leader']==0)
+					{
+						$map['first_leader'] = $user['first_leader'];
+					}
+					$map['old_userid'] = $user['user_id'];
+					$map['sign_old_openid'] = 333;
+					Db::name('users')->where('user_id', $old_user['user_id'])->save($map);
+					Db::name('oauth_users')->where('openid', $data['openid'])->save(['user_id'=>$old_user['user_id']]);
+					Db::name('users')->where(array('user_id'=>$user['user_id']))->delete();
+				}else{
+					write_log('新数据');
+					$map['openid'] = $data['openid'];
+					$map['sign_old_openid'] = 444;
+					Db::name('users')->where('user_id', $user['user_id'])->save($map);
+				}
+			 	
+			}
 
 			$user['token'] = $map['token'];
 			$user['last_login'] = $map['last_login'];
-			Db::name('users')->where('user_id', $user['user_id'])->save($map);
 		}
 	
 		return array('status'=>1,'msg'=>'登陆成功','result'=>$user);
@@ -418,7 +479,7 @@ class UsersLogic extends Model
 		if(!empty($head_pic)){
 			$map['head_pic'] = $head_pic;
 		}else{
-			$map['head_pic']='/public/images/icon_goods_thumb_empty_300.png?v=1';
+			$map['head_pic']='/public/images/icon_goods_thumb_empty_300.png';
 		}
 
 		$data=[
@@ -1607,15 +1668,7 @@ class UsersLogic extends Model
 		
 		return false;
 
-	}
-	
-
-	private function getArrayValue($arr){
-        $data = [];
-        foreach($arr as $v)
-            $data[] = $v['user_id'];
-        return $data;
-    }    
+	}    
 
     //获取用户下级
     private function getUserLevBot($uid){
@@ -1626,7 +1679,7 @@ class UsersLogic extends Model
             $sql = "select user_id from tp_users where first_leader = $uid";
             
         $res = M('users')->query($sql);
-        $arr1 = $this->getArrayValue($res);          
+        $arr1 = get_arr_column($res,'user_id');        
         return $arr1;
     }
 
@@ -1641,6 +1694,38 @@ class UsersLogic extends Model
         }
         return $arr;
 	}
+
+    //获取指定级别的用户上级
+    public function getUserLevTop($uid,$level){
+		//获取上级
+		$sql = "select level,first_leader from tp_users where user_id = $uid";
+		$res = M('users')->query($sql);
+
+		//获取上级级别
+		if(count($res)){
+			if($res[0]['level'] >= $level)return ['user_id'=>0,'level'=>0];
+			$leader = ['user_id'=>$res[0]['first_leader'],'level'=>0];
+			$sql = "select level from tp_users where user_id = {$res[0]['first_leader']}";
+			$res1 = M('users')->query($sql);	
+			
+			if(count($res1)){  
+				if($res1[0]['level'] >= $level){
+					$leader['level'] = $res1[0]['level'];
+					return $leader;
+				}else
+					return $this->getUserLevTop($res[0]['first_leader'],$level);
+			}
+			return ['user_id'=>0,'level'=>0];
+		}
+		return ['user_id'=>0,'level'=>0];
+	}    	
 	
+	/**
+	 * 获取某个ID下面的团队总人数
+	 */
+	public function get_team_num($user_id){
+		$arr = [];
+		return count($this->getUserLevBotAll($user_id,$arr));
+	}
 
 }

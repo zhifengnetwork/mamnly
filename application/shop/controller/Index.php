@@ -50,8 +50,10 @@ class Index extends MobileBase {
         $this->assign('hot_goods',$hot_goods);
         $favourite_goods = M('goods')->where("is_recommend=1 and is_on_sale=1")->order('sort DESC')->limit(50)->cache(true,TPSHOP_CACHE_TIME)->select();//首页推荐商品
         $is_new = M('goods')->where("is_new=1 and is_on_sale=1")->order('sort DESC')->limit(2)->select();
-        // var_dump($is_new);exit;
-
+        //公告
+        $article_id = 2;//input('article_id/d', 1);
+        $article = Db::name('article')->where("article_type", $article_id)->find();
+        $this->assign('article', $article);
         //秒杀商品
         $now_time = time();  //当前时间
         if(is_int($now_time/7200)){      //双整点时间，如：10:00, 12:00

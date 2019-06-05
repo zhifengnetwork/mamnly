@@ -1,5 +1,6 @@
 /runtime
 /application/database.php
+/application/api/controller-old/
 /public/upload/goods/thumb/*
 /vendor/topthink/think-captcha/assets/bgs/*
 .vscode

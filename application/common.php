@@ -197,6 +197,7 @@ function getAllUp($invite_id,&$userList=array())
 
     $goods_list = M('order_goods')->where(['order_id'=>$order_id])->select();
     agent_performance($order_id);
+    $num = 0;
     foreach($goods_list as $k => $v){
 
         $goodId = $v['goods_id'];
@@ -204,6 +205,23 @@ function getAllUp($invite_id,&$userList=array())
 
         $model = new BonusLogic($userId, $goodId,$goodNum,$orderSn,$order_id);
         $res = $model->bonusModel();
+
+        if(!$v['prom_type'] && !$v['prom_id'] && ($v['cat_id'] != C('customize.special_cid'))){
+            $num +=  ($goodNum * $v['final_price']); 
+        }
+    }
+
+    //查找订单用户上级链中的level为4或5的用户
+    $UsersLogic = new \app\common\logic\UsersLogic();
+    $leader = $UsersLogic->getUserLevTop($userId,4);
+    $Yeji = M('yeji');
+    $Yeji->add(['uid'=>$userId,'money'=>$num,'addtime'=>time(),'order_id'=>$order_id]);
+    if($leader['user_id']){
+        $Yeji->add(['uid'=>$leader['user_id'],'money'=>$num,'addtime'=>time(),'order_id'=>$order_id]);
+        $leader = $UsersLogic->getUserLevTop($userId,5);
+        if($leader['user_id']){
+            $Yeji->add(['uid'=>$leader['user_id'],'money'=>$num,'addtime'=>time(),'order_id'=>$order_id]);
+        }
     }
  }
 
@@ -358,7 +376,7 @@ function getAllUp($invite_id,&$userList=array())
     {
         $order_amount = $vs['goods_price'] * $vs['goods_num'];
         $rec_id=$vs['rec_id'];
-         $agent_performance_peason= M('agent_performance_log')->where(['user_id'=>$user_id,'order_id'=>$order_id])->find();
+         $agent_performance_peason= M('agent_performance_log')->where(['user_id'=>$user_id,'order_id'=>$order_id,'ogoods_id'=>$rec_id])->find();
           //查看业绩是否已加，加了就不重复
          if(empty($agent_performance_peason)){
             //加个人业绩(下单人)
@@ -394,7 +412,7 @@ function getAllUp($invite_id,&$userList=array())
        // {
             //加 团队业绩
            foreach($arr['recUser'] as $k => $v){
-              $agent_performance_team= M('agent_performance_log')->where(['user_id'=>$v['user_id'],'order_id'=>$order_id])->find();
+              $agent_performance_team= M('agent_performance_log')->where(['user_id'=>$v['user_id'],'order_id'=>$order_id,'ogoods_id'=>$rec_id])->find();
                //查看业绩是否已加，加了就不重复
              if(empty($agent_performance_team)){
                     $cunzai = M('agent_performance')->where(['user_id'=>$v['user_id']])->find();
@@ -579,7 +597,7 @@ function goods_thum_images($goods_id, $width, $height,$item_id=0)
 
 
     if (empty($original_img)) {
-        return '/public/images/icon_goods_thumb_empty_300.png?v=1';
+        return '/public/images/icon_goods_thumb_empty_300.png';
     }
     
     if(tpCache('oss.oss_switch')){
@@ -591,7 +609,7 @@ function goods_thum_images($goods_id, $width, $height,$item_id=0)
 
     $original_img = '.' . $original_img; // 相对路径
     if (!is_file($original_img)) {
-        return '/public/images/icon_goods_thumb_empty_300.png?v=1';
+        return '/public/images/icon_goods_thumb_empty_300.png';
     }
 
     try {
@@ -643,7 +661,7 @@ function get_sub_images($sub_img, $goods_id, $width, $height)
     
     $original_img = '.' . $sub_img['image_url']; //相对路径
     if (!is_file($original_img)) {
-        return '/public/images/icon_goods_thumb_empty_300.png?v=1';
+        return '/public/images/icon_goods_thumb_empty_300.png';
     }
 
     try {
@@ -1363,23 +1381,24 @@ function update_pay_status($order_sn,$ext=array())
         $time = date('Y-m-d H:i:s',time());
         
         // 发送公众号消息给用户
-        $userinfo = Db::name('users')->where(['user_id' => $order['user_id']])->field('openid,first_leader')->find();
+        $userinfo = Db::name('users')->where(['user_id' => $order['user_id']])->field('openid,first_leader,nickname,user_id')->find();
         if ($userinfo['openid']) {
             $goods = Db::name('OrderGoods')->where(['order_id'=>$order['order_id']])->select();
                 $text = '';
                 foreach ($goods as $key => $value) {
                     $text .= $value['goods_name'].'(规格：'.$value['spec_key_name'].',数量：'.$value['goods_num'].',价格：'.$value['final_price'].');';
                 }
-            $wx_content = "订单支付成功！\n\n订单：{$order_sn}\n支付时间：{$time}\n商户：曼梦丽环球直供\n商品：{$text}\n金额：{$order['total_amount']}\n\n【曼梦丽环球直供】欢迎您的再次购物！";
+            $wx_content = "订单支付成功！\n\n订单：{$order_sn}\n支付时间：{$time}\n商户：凡露希环球直供\n商品：{$text}\n金额：{$order['total_amount']}\n\n【凡露希环球直供】欢迎您的再次购物！";
             $wechat = new \app\common\logic\wechat\WechatUtil();
             $wechat->sendMsg($userinfo['openid'], 'text', $wx_content);
 
             //发给上级
-            $first_leader_openid = Db::name('users')->where(['user_id' => $userinfo['first_leader']])->value('openid');
+            //$first_leader_openid = Db::name('users')->where(['user_id' => $userinfo['first_leader']])->value('openid');
+            $first_leader_openid = Db::name('users')->field('openid,nickname,user_id')->where(['user_id' => $userinfo['first_leader']])->find();
             if($first_leader_openid){
-                $wx_first_leader_content = "你的下级订单支付成功！\n\n订单：{$order_sn}\n支付时间：{$time}\n商品：{$text}\n金额：{$order['total_amount']}";
+                $wx_first_leader_content = "你的下级{$userinfo['nickname']}[ID:{$userinfo['user_id']}]订单支付成功！\n\n订单：{$order_sn}\n支付时间：{$time}\n商品：{$text}\n金额：{$order['total_amount']}";
                 $wechat = new \app\common\logic\wechat\WechatUtil();
-                $wechat->sendMsg($first_leader_openid, 'text', $wx_first_leader_content);
+                $wechat->sendMsg($first_leader_openid['openid'], 'text', $wx_first_leader_content);
             }
 
         }
@@ -2164,6 +2183,8 @@ function continue_sign($user_id){
 */
 function provingReceive($user, $type, $num = 1)
 {
+ 
+
     //获得当日凌晨的时间戳
     // $today = strtotime(date("Y-m-d"),time());
 
@@ -2171,6 +2192,22 @@ function provingReceive($user, $type, $num = 1)
 
     //签到商品
     if ($type == 1) {
+        
+        // 扫码进入会员可领取1次
+        if ($user['is_code'] == 1 && $user['level'] < 2) {
+            if ($num > 1) {
+                return array('status' => 0, 'msg' => '超过领取数量，只能领取一件！', 'result' => array());
+            }
+
+            $data = M('order_sign_receive')->where(['uid' => $user['user_id'], 'type' => 2])->find();
+            
+            //扫码只可领取1次
+            if (!empty($data)) {
+                return array('status' => 0, 'msg' => '已超出领取次数', 'result' => array());
+            }else{
+                return array('status' => 2, 'msg' => '可领取', 'result' => array());
+            }
+        }
 
         //店主以上可领取
         if ($user['level'] < 3) {
@@ -2189,21 +2226,6 @@ function provingReceive($user, $type, $num = 1)
     //免费领取商品
     if ($type == 2) {
 
-        // 扫码进入会员可领取1次
-        if ($user['is_code'] == 1 && $user['level'] < 2) {
-            if ($num > 1) {
-                return array('status' => 0, 'msg' => '超过领取数量，只能领取一件！', 'result' => array());
-            }
-
-            $data = M('order_sign_receive')->where(['uid' => $user['user_id'], 'type' => 2])->find();
-            
-            //扫码只可领取1次
-            if (!empty($data)) {
-                return array('status' => 0, 'msg' => '已超出领取次数', 'result' => array());
-            }else{
-                return array('status' => 2, 'msg' => '可领取', 'result' => array());
-            }
-        }
 
         //当天订单
         // $order = M('order_sign_receive')->where(['uid' => $user['user_id'], 'type' => 2, 'addend_time' => ['>',$today]])->count();
@@ -2219,16 +2241,19 @@ function provingReceive($user, $type, $num = 1)
         }
     }
     //下单领取
-    if ($type == 3) {
+    if ($type>=3) {
         //活动时间 2019-05-17 开始
          $pay_time = strtotime('2019-05-17 00:00:00');
+         $order_new =array();
         //查询领取的 sign_free_receive =3 下单领取的订单
         $where_goods = [
            // 'og.is_send'    => 1,
             //'og.prom_type' =>0,//只有普通订单才算业绩
-            'o.pay_status'=>1,
+           // 'o.pay_status'=>1,
+            'o.pay_status'=> ['IN','0,1'],
+            'o.order_status'=>['notIn','3,5'],
             'o.user_id'=>$user['user_id'],
-            'gs.sign_free_receive'=>3,
+            'gs.sign_free_receive'=>$type,
             
           ];
         $order_free_count = Db::name('order_goods')->alias('og')
@@ -2238,7 +2263,7 @@ function provingReceive($user, $type, $num = 1)
              ->order('og.order_id desc')
              ->count();
         //查询领取的 2019-05-17 下单领取的订单
-
+        
         $where = [
            // 'og.is_send'    => 1,
             //'og.prom_type' =>0,//只有普通订单才算业绩
@@ -2247,17 +2272,31 @@ function provingReceive($user, $type, $num = 1)
             'gs.sign_free_receive'=>0,
             
           ];
-        $order_count = Db::name('order_goods')->alias('og')
+        $order_array = Db::name('order_goods')->alias('og')
+             ->field("gs.sign_free_receive,o.order_sn")
              ->where($where)
              ->where('pay_time>'.$pay_time)
              ->join('goods gs','gs.goods_id=og.goods_id','LEFT')
              ->join('order o','og.order_id=o.order_id','LEFT')
              ->order('og.order_id desc')
-             ->count();
+             ->select();
+        foreach($order_array as $key=>$val)
+        {
+           
+             $order_new[$val['order_sn']]=$val;
+
+        }
+
+        $order_count =count($order_new);
+//print_r($order_free_count);exit;
              //echo Db::name('order_goods')->getlastsql();exit;
         $user_num = $order_count-$order_free_count;
+       // $user_num2 = $order_count-$order_free_count2;
+        //查询下单领取产品
+        $goods = M('goods')->where('sign_free_receive',3)->find();
         if($user_num>0)
         {
+
          if ($user_num < $num) {
             $signFreeNum = empty($user_num) ? 0 : $user_num;
             return array('status' => 0, 'msg' => '超过领取数量，目前只可领取'.$signFreeNum.'件！', 'result' => array());
@@ -2281,15 +2320,27 @@ function provingReceive($user, $type, $num = 1)
 * $user 
 * $order 
 */
-function ReturnReceiveNumber($user, $order)
+function ReturnReceiveNumber($userId, $order)
 {
     if ($order['sign_price'] > 0 || $order['discount'] > 0) {
-        $signNum = M('order_sign_receive')->where(array('order_id'=>$order['order_id'],'uid'=>$user))->select();
+        $signNum = M('order_sign_receive')->where(array('order_id'=>$order['order_id'],'uid'=>$userId))->select();
+        $users = M('Users')->where(array('user_id'=>$userId))->find();
+
+
         foreach ($signNum as $key => $value) {
             if ($value['type'] == 1) {
-                M('Users')->where(array('user_id' => $user ))->setInc('sign_free_num',$value['goods_num']);
+
+                if ($users['level'] >= 2) {
+                    M('Users')->where(array('user_id' => $userId ))->setInc('sign_free_num',$value['goods_num']);
+                }
+                // 扫码用户修改成1（未领取面膜）
+                if ($users['is_code'] == 2 && $users['level'] <= 1){
+                    Db::name('users')->where('user_id', $userId)->update(['is_code'=>1]);
+                    M('order_sign_receive')->where(array('order_id'=>$order['order_id'],'uid'=>$userId))->delete();
+                }
+
             } elseif ($value['type'] == 2) {
-                M('Users')->where(array('user_id' => $user ))->setInc('distribut_free_num',$value['goods_num']);
+                M('Users')->where(array('user_id' => $userId ))->setInc('distribut_free_num',$value['goods_num']);
             }
         }
     }

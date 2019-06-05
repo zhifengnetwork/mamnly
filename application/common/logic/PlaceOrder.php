@@ -177,12 +177,12 @@ class PlaceOrder
         $user_money = $this->pay->getUserMoney();
         $payList = $this->pay->getPayList();
         $user = $this->pay->getUser();
-        if($payList[0]['goods']->sign_free_receive == 1 && $user['sign_free_num'] == 0 && $this->pay->getSignPrice() != 0){
-                throw new TpshopException('提交订单', 0, ['status' => -7, 'msg' => "免费领取次数不够", 'result' => '']);
-        }
-        if($payList[0]['goods']->sign_free_receive == 2 && $this->pay->getSignPrice() != 0){
-                throw new TpshopException('提交订单', 0, ['status' => -7, 'msg' => "免费领取次数不够", 'result' => '']);
-        }
+        // if($payList[0]['goods']->sign_free_receive == 1 && $this->pay->getSignPrice() != 0){
+        //         throw new TpshopException('提交订单', 0, ['status' => -7, 'msg' => "免费领取次数不够1", 'result' => '']);
+        // }
+        // if($payList[0]['goods']->sign_free_receive == 2 && $this->pay->getSignPrice() != 0){
+        //         throw new TpshopException('提交订单', 0, ['status' => -7, 'msg' => "免费领取次数不够2", 'result' => '']);
+        // }
         if ($pay_points || $user_money) {
             $user = $this->pay->getUser();
             if ($user['is_lock'] == 1) {
@@ -449,17 +449,21 @@ class PlaceOrder
             Db::name('Order_sign_receive')->save($data);
 
             if ($payList[0]['goods']->sign_free_receive == 1) {
-                Db::name('users')->where('user_id', $user['user_id'])->setDec('sign_free_num', $catId['goods_num']);// 减签到领取次数
+
+                if ($user['level'] >= 2) {
+                    Db::name('users')->where('user_id', $user['user_id'])->setDec('sign_free_num', $catId['goods_num']);// 减签到领取次数
+                }
+                // 扫码用户修改成2（已领取面膜）
+                if ($user['is_code'] == 1){
+                    Db::name('users')->where('user_id', $user['user_id'])->update(['is_code'=>2]);
+                }
+                
             } elseif ($payList[0]['goods']->sign_free_receive == 2 ) {
 
                 if ($user['level'] >= 2) {
                     Db::name('users')->where('user_id', $user['user_id'])->setDec('distribut_free_num', $catId['goods_num']);// 减免费领取次数
                 }
                 
-                // 扫码用户修改成2（已领取面膜）
-                if ($user['is_code'] == 1){
-                    Db::name('users')->where('user_id', $user['user_id'])->update(['is_code'=>2]);
-                }
             }
         }
     }

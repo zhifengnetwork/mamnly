@@ -11,7 +11,15 @@ use think\Controller;
 class ApiBase extends Controller
 {
 
+    public function _initialize(){
+
+        $this->key = 'zhelishimiyao';
+        //秘钥
+    }
+
     public function ajaxReturn($data){
+        header('Access-Control-Allow-Origin:*');
+        header('Access-Control-Allow-Headers:*');
         header('Content-Type:application/json; charset=utf-8');
         exit(json_encode($data,JSON_UNESCAPED_UNICODE));
     }
@@ -27,8 +35,7 @@ class ApiBase extends Controller
             "exp"=> $time + 36000 , 
             "user_id"=> $user_id
         );
-        $key = 'zhelishimiyao';
-        $token = JWT::encode($payload, $key, $alg = 'HS256', $keyId = null, $head = null);
+        $token = JWT::encode($payload, $this->key, $alg = 'HS256', $keyId = null, $head = null);
         return $token;
     }
 
@@ -36,8 +43,7 @@ class ApiBase extends Controller
      * 解密token
      */
     public function decode_token($token){
-        $key = 'zhelishimiyao';
-        $payload = json_decode(json_encode(JWT::decode($token, $key, ['HS256'])),true);
+        $payload = json_decode(json_encode(JWT::decode($token, $this->key, ['HS256'])),true);
         return $payload;
     }
 
@@ -65,22 +71,44 @@ class ApiBase extends Controller
 
         $token = $headers['Token'];
         if(!$token){
-              $this->ajaxReturn(['status' => -1 , 'msg'=>'已过期','data'=>$headers]);
+            //401
+            header('HTTP/1.1 401 Unauthorized');
+            header('Status: 401 Unauthorized');
+            $this->ajaxReturn(['status' => -1 , 'msg'=>'token不存在','data'=>null]);
         }
-
 
         $res = $this->decode_token($token);
 
         if(!$res){
-            $this->ajaxReturn(['status' => -1 , 'msg'=>'token已过期','data'=>'']);
+            //401
+            header('HTTP/1.1 401 Unauthorized');
+            header('Status: 401 Unauthorized');
+            $this->ajaxReturn(['status' => -1 , 'msg'=>'token已过期','data'=>null]);
 
         }
+
+        if(!isset($res['iat']) || !isset($res['exp']) || !isset($res['user_id']) ){
+            //401
+            header('HTTP/1.1 401 Unauthorized');
+            header('Status: 401 Unauthorized');
+            $this->ajaxReturn(['status' => -1 , 'msg'=>'token已过期：'.$res,'data'=>null]);
+        }
+
         if($res['iat']>$res['exp']){
-            $this->ajaxReturn(['status' => -1 , 'msg'=>'token已过期','data'=>'']);
+            //401
+            header('HTTP/1.1 401 Unauthorized');
+            header('Status: 401 Unauthorized');
+            $this->ajaxReturn(['status' => -1 , 'msg'=>'token已过期','data'=>null]);
         }
         
         
        return $res['user_id'];
        
+    }
+    /**
+     * 空
+     */
+    public function _empty(){
+        $this->ajaxReturn(['status' => -1 , 'msg'=>'接口不存在','data'=>null]);
     }
 }
